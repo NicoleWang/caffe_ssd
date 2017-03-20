@@ -1,0 +1,4 @@
+1. convert original label file into xml format, using create_xml.py
+2. shuffle all files in training set and generate train / val list using create_train_test_file.py
+3. generate image name and its size using test_name_size.py
+4. generate lmdbdata using create_lmdbdata_scenetext.sh, be care of the data dirs !!
