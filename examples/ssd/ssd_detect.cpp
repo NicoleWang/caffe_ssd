@@ -25,6 +25,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <fstream>
 
 #ifdef USE_OPENCV
 using namespace caffe;  // NOLINT(build/namespaces)
@@ -285,28 +286,54 @@ int main(int argc, char** argv) {
   // Process image one by one.
   std::ifstream infile(argv[3]);
   std::string file;
+  int img_num = 0;
+  clock_t start = clock();
   while (infile >> file) {
     if (file_type == "image") {
+      img_num++;
       cv::Mat img = cv::imread(file, -1);
       CHECK(!img.empty()) << "Unable to decode image " << file;
       std::vector<vector<float> > detections = detector.Detect(img);
 
+      size_t pos = file.find("/");
+      std::string imname = file.substr(pos, file.length());
+      std::cout << "processing " << img_num << "th img: " << imname << std::endl;
+
+      std::string save_dir = "results";
+      std::fstream fn;
+      std::string file_path;
+      file_path = save_dir + "/" + imname + ".txt";
+//      fn.open(file_path.c_str(), std::ios::out);
       /* Print the detection results. */
       for (int i = 0; i < detections.size(); ++i) {
-        const vector<float>& d = detections[i];
+          const vector<float>& d = detections[i];
+          std::cout << static_cast<int>(d[3] * img.cols) << "\t"
+              << static_cast<int>(d[4] * img.rows) << "\t"
+              << static_cast<int>(d[5] * img.cols) << "\t"
+              << static_cast<int>(d[6] * img.rows) << "\t"
+              << d[2] << std::endl;
         // Detection format: [image_id, label, score, xmin, ymin, xmax, ymax].
         CHECK_EQ(d.size(), 7);
         const float score = d[2];
-        if (score >= confidence_threshold) {
+        if (score >= 0.3) {
+         /*
           out << file << " ";
-          out << static_cast<int>(d[1]) << " ";
-          out << score << " ";
-          out << static_cast<int>(d[3] * img.cols) << " ";
-          out << static_cast<int>(d[4] * img.rows) << " ";
-          out << static_cast<int>(d[5] * img.cols) << " ";
-          out << static_cast<int>(d[6] * img.rows) << std::endl;
-        }
+          fn << static_cast<int>(d[3] * img.cols) << "\t"
+             << static_cast<int>(d[4] * img.rows) << "\t"
+             << static_cast<int>(d[5] * img.cols) << "\t"
+             << static_cast<int>(d[6] * img.rows) << std::endl;
+        */
+          cv::Rect rect;
+          rect.x = static_cast<int>(d[3] * img.cols);
+          rect.y = static_cast<int>(d[4] * img.rows);
+          rect.width = static_cast<int>(d[5] * img.cols) - static_cast<int>(d[3] * img.cols) + 1;
+          rect.height = static_cast<int>(d[6] * img.rows) - static_cast<int>(d[4] * img.rows) + 1;
+          cv::rectangle(img, rect, cv::Scalar(255,0,0));
+          }
       }
+      std::string outpath = "results/" + imname;
+      std::cout << "outpath: " << outpath << std::endl;
+      cv::imwrite(outpath.c_str(), img);
     } else if (file_type == "video") {
       cv::VideoCapture cap(file);
       if (!cap.isOpened()) {
@@ -349,6 +376,9 @@ int main(int argc, char** argv) {
       LOG(FATAL) << "Unknown file_type: " << file_type;
     }
   }
+  clock_t end = clock();
+  double duration = (end - start) / (double) CLOCKS_PER_SEC;
+  std::cout << "average detection time: " << duration * 1000 * 1.0 / img_num << " ms" <<std::endl;
   return 0;
 }
 #else

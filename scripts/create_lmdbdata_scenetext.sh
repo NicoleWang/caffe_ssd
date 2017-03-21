@@ -1,5 +1,8 @@
 cur_dir=$(cd $( dirname ${BASH_SOURCE[0]} ) && pwd )
+echo $cur_dir
 root_dir=$cur_dir/../..
+root_dir=/home/wangyuzhuo/Experiments/ssd_git/caffe_ssd
+echo $root_dir
 
 cd $root_dir
 

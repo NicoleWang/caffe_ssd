@@ -4,11 +4,11 @@ import cv2
 import string
 
 src_img_dir = "/home/wangyuzhuo/Data/train_data/chn_data/JPEGImages"
-src_txt_dir = "/home/wangyuzhuo/Data/train_data/chn_data/Annotations"
-out_xml_dir = "/home/wangyuzhuo/Data/train_data/chn_data/XMLAnnotations"
+src_txt_dir = "/home/wangyuzhuo/Data/train_data/chn_data/Line_Annotations"
+out_xml_dir = "/home/wangyuzhuo/Data/train_data/chn_data/LineXMLAnnotations"
 
+'''
 img_Lists = glob.glob(src_img_dir + '/*.jpg')
-
 img_basenames = [] # e.g. 100.jpg
 for item in img_Lists:
     print item
@@ -18,6 +18,13 @@ img_names = [] # e.g. 100
 for item in img_basenames:
     temp1, temp2 = os.path.splitext(item)
     img_names.append(temp1)
+'''
+img_names = []
+filename_list = os.listdir(src_txt_dir)
+for tname in filename_list:
+    imprefix = tname[:-8]
+    img_names.append(imprefix)
+    print imprefix
 
 for img in img_names:
     im = cv2.imread((src_img_dir + '/' + img + '.jpg'))
