@@ -82,7 +82,14 @@ void MultiBoxLossLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
     layer_param.add_loss_weight(loc_weight_);
     loc_loss_layer_ = LayerRegistry<Dtype>::CreateLayer(layer_param);
     loc_loss_layer_->SetUp(loc_bottom_vec_, loc_top_vec_);
-  } else {
+   } else if (loc_loss_type_ == MultiBoxLossParameter_LocLossType_IOU) {
+    LayerParameter layer_param;
+    layer_param.set_name(this->layer_param_.name() + "_Iou_loc");
+    layer_param.set_type("IouLoss");
+    layer_param.add_loss_weight(loc_weight_);
+    loc_loss_layer_ = LayerRegistry<Dtype>::CreateLayer(layer_param);
+    loc_loss_layer_->SetUp(loc_bottom_vec_, loc_top_vec_);
+   } else {
     LOG(FATAL) << "Unknown localization loss type.";
   }
   // Set up confidence loss layer.

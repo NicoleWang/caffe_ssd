@@ -1248,6 +1248,7 @@ message MultiBoxLossParameter {
   enum LocLossType {
     L2 = 0;
     SMOOTH_L1 = 1;
+    IOU = 2;
   }
   optional LocLossType loc_loss_type = 1 [default = SMOOTH_L1];
   // Confidence loss type.
